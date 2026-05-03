@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitCoach — Interactive Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #1a1a18;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.stage {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  max-width: 900px;
+  width: 100%;
+}
+
+.sidebar {
+  flex-shrink: 0;
+  width: 200px;
+  padding-top: 20px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.sidebar-logo-icon {
+  width: 28px; height: 28px;
+  background: #534AB7;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.sidebar-logo-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f5f3ee;
+}
+
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #5F5E5A;
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+.flow-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  transition: background 0.15s;
+}
+
+.flow-item:hover { background: #2c2c2a; }
+.flow-item.active { background: #2c2c2a; }
+
+.flow-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.flow-name {
+  font-size: 12px;
+  color: #8a8a84;
+  line-height: 1.3;
+}
+
+.flow-item.active .flow-name { color: #f5f3ee; }
+
+.flow-section { margin-bottom: 20px; }
+
+.section-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.badge-coach { background: #EEEDFE; color: #3C3489; }
+.badge-student { background: #EAF3DE; color: #27500A; }
+
+.phone-wrap { flex-shrink: 0; position: relative; }
+
+.device {
+  width: 320px;
+  height: 640px;
+  background: #fff;
+  border-radius: 44px;
+  border: 8px solid #2c2c2a;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 0 1px #444441, 0 40px 80px rgba(0,0,0,0.6);
+}
+
+.device-notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 100px; height: 22px;
+  background: #2c2c2a;
+  border-radius: 0 0 14px 14px;
+  z-index: 100;
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  background: #f5f3ee;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.screen.active { opacity: 1; pointer-events: all; }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0.5; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+.screen.slide-in { animation: slideIn 0.25s ease forwards; }
+
+.status-bar {
+  background: #f1efe8;
+  padding: 22px 18px 6px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8a8a84;
+  flex-shrink: 0;
+}
+
+.top-bar {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid #eceae3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.tt { font-size: 15px; font-weight: 500; color: #1a1a18; }
+.ts { font-size: 11px; color: #8a8a84; }
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 16px;
+  background: #f5f3ee;
+}
+.body::-webkit-scrollbar { display: none; }
+
+.sl {
+  font-size: 10px;
+  font-weight: 500;
+  color: #8a8a84;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0 0 7px;
+}
+
+.dv { height: 1px; background: #eceae3; margin: 10px 0; }
+
+.bottom-nav {
+  border-top: 1px solid #eceae3;
+  display: flex;
+  background: #fff;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+}
+
+.ni { flex: 1; padding: 8px 4px 4px; text-align: center; cursor: pointer; }
+.ni-i { font-size: 18px; display: block; }
+.ni-l { font-size: 9px; color: #8a8a84; display: block; margin-top: 2px; }
+.ni.on .ni-l { color: #534AB7; font-weight: 500; }
+.ni-d { width: 4px; height: 4px; border-radius: 50%; margin: 0 auto 1px; }
+.ni.on .ni-d { background: #534AB7; }
+
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin: 8px 0; }
+.cd { text-align: center; font-size: 10px; padding: 4px 2px; border-radius: 4px; color: #8a8a84; }
+.cd.has { background: #EEEDFE; color: #534AB7; font-weight: 500; border-radius: 50%; }
+.cd.today { background: #534AB7; color: #fff; font-weight: 500; border-radius: 50%; }
+
+.btn-primary {
+  background: #534AB7; color: #fff; border: none;
+  border-radius: 10px; font-size: 12px; font-weight: 500;
+  padding: 10px; text-align: center; cursor: pointer;
+  display: block; width: 100%; font-family: 'DM Sans', sans-serif;
+}
+
+.btn-outline {
+  background: transparent; color: #534AB7; border: 1px solid #534AB7;
+  border-radius: 10px; font-size: 12px; font-weight: 500;
+  padding: 10px; text-align: center; cursor: pointer;
+  display: block; width: 100%; font-family: 'DM Sans', sans-serif;
+}
+
+.card {
+  background: #fff; border-radius: 12px; padding: 12px 14px;
+  margin-bottom: 8px; border: 1px solid #eceae3; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: #AFA9EC; }
+
+.nc { background: #FCEBEB; border-radius: 8px; padding: 9px 12px; margin-bottom: 7px; border-left: 2px solid #E24B4A; }
+.nc-t { font-size: 11px; font-weight: 500; color: #791F1F; }
+.nc-b { font-size: 10px; color: #A32D2D; margin-top: 3px; line-height: 1.4; }
+
+.lrow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid #eceae3; cursor: pointer;
+}
+.lrow:hover { opacity: 0.75; }
+.lrow:last-child { border-bottom: none; }
+
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; flex-shrink: 0;
+}
+
+.tag {
+  font-size: 9px; padding: 3px 8px; border-radius: 10px;
+  font-weight: 500; margin-left: auto; flex-shrink: 0;
+}
+
+.back-btn {
+  display: flex; align-items: center; gap: 4px;
+  cursor: pointer; color: #534AB7; font-size: 12px;
+}
+
+.toast {
+  position: absolute; bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a18; color: #f5f3ee;
+  font-size: 11px; padding: 8px 16px;
+  border-radius: 20px; white-space: nowrap;
+  z-index: 999; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+.heat-dot { cursor: pointer; transition: transform 0.15s; }
+.heat-dot:hover { transform: scale(1.2); }
+
+.input-box {
+  background: #f1efe8; border-radius: 8px; padding: 9px 12px;
+  font-size: 12px; color: #b4b2a9; border: 1px solid #eceae3;
+  width: 100%; font-family: 'DM Sans', sans-serif;
+}
+
+.slot {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border-radius: 10px; padding: 10px 12px;
+  margin-bottom: 7px; border: 1px solid #eceae3;
+}
+
+.slot-btn {
+  background: #534AB7; color: #fff; border: none;
+  border-radius: 7px; font-size: 10px; font-weight: 500;
+  padding: 6px 12px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; flex-shrink: 0;
+}
+
+.splash-inner {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; padding: 40px 24px 32px;
+}
+
+.right-info { flex: 1; padding-top: 20px; max-width: 260px; }
+
+.right-info h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; color: #f5f3ee;
+  margin-bottom: 8px; line-height: 1.2;
+}
+
+.right-info p { font-size: 13px; color: #5F5E5A; line-height: 1.6; margin-bottom: 16px; }
+
+.tap-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5F5E5A; margin-top: 8px; }
+.tap-dot { width: 6px; height: 6px; border-radius: 50%; background: #534AB7; }
+
+@media (max-width: 700px) {
+  .stage { flex-direction: column; align-items: center; }
+  .sidebar { width: 100%; max-width: 320px; padding-top: 0; }
+  .right-info { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5" stroke="#fff" stroke-width="1.5"/>
+          <circle cx="7" cy="7" r="2" fill="#fff"/>
+        </svg>
+      </div>
+      <span class="sidebar-logo-name">FitCoach</span>
+    </div>
+
+    <div class="flow-section">
+      <div class="sidebar-label">Start</div>
+      <div class="flow-item active" data-screen="splash" onclick="go('splash')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Splash screen</div>
+      </div>
+      <div class="flow-item" data-screen="register" onclick="go('register')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Register</div>
+      </div>
+      <div class="flow-item" data-screen="login" onclick="go('login')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Login</div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="section-badge badge-coach">Coach</div>
+      <div class="flow-item" data-screen="coach-home" onclick="go('coach-home')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Calendar home</div>
+      </div>
+      <div class="flow-item" data-screen="coach-students" onclick="go('coach-students')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Student list</div>
+      </div>
+      <div class="flow-item" data-screen="coach-profile" onclick="go('coach-profile')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Student profile</div>
+      </div>
+      <div class="flow-item" data-screen="coach-heatmap" onclick="go('coach-heatmap')">
+        <div class="flow-dot" style="background:#E24B4A;"></div>
+        <div class="flow-name">Body heatmap notes</div>
+      </div>
+      <div class="flow-item" data-screen="coach-recipes" onclick="go('coach-recipes')">
+        <div class="flow-dot" style="background:#534AB7;"></div>
+        <div class="flow-name">Recipe management</div>
+      </div>
+    </div>
+
+    <div class="flow-section">
+      <div class="section-badge badge-student">Student</div>
+      <div class="flow-item" data-screen="student-home" onclick="go('student-home')">
+        <div class="flow-dot" style="background:#3B6D11;"></div>
+        <div class="flow-name">Home — book class</div>
+      </div>
+      <div class="flow-item" data-screen="student-notes" onclick="go('student-notes')">
+        <div class="flow-dot" style="background:#E24B4A;"></div>
+        <div class="flow-name">Body notes</div>
+      </div>
+      <div class="flow-item" data-screen="student-recipes" onclick="go('student-recipes')">
+        <div class="flow-dot" style="background:#3B6D11;"></div>
+        <div class="flow-name">Recipes</div>
+      </div>
+      <div class="flow-item" data-screen="student-photos" onclick="go('student-photos')">
+        <div class="flow-dot" style="background:#3B6D11;"></div>
+        <div class="flow-name">Progress photos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHONE -->
+  <div class="phone-wrap">
+    <div class="device">
+      <div class="device-notch"></div>
+      <div class="toast" id="toast"></div>
+
+      <!-- ══ SPLASH ══ -->
+      <div class="screen active" id="screen-splash">
+        <div class="splash-inner">
+          <div style="width:60px;height:60px;border-radius:18px;background:#1a1a18;margin-bottom:16px;display:flex;align-items:center;justify-content:center;">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="10" stroke="#f5f3ee" stroke-width="2.5"/><circle cx="14" cy="14" r="4" fill="#f5f3ee"/></svg>
+          </div>
+          <div style="font-size:22px;font-weight:500;color:#1a1a18;margin-bottom:6px;font-family:'DM Serif Display',serif;">FitCoach</div>
+          <div style="font-size:12px;color:#8a8a84;text-align:center;margin-bottom:40px;line-height:1.5;">The platform for coaches and their clients</div>
+          <button class="btn-primary" style="margin-bottom:10px;" onclick="go('login')">Log in</button>
+          <button class="btn-outline" onclick="go('register')">Create an account</button>
+          <div style="font-size:10px;color:#b4b2a9;margin-top:20px;text-align:center;">By continuing you agree to our Terms of Service</div>
+        </div>
+      </div>
+
+      <!-- ══ REGISTER ══ -->
+      <div class="screen" id="screen-register">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="back-btn" onclick="go('splash')">‹ Back</div>
+          <div class="tt">Create account</div>
+          <div style="width:40px;"></div>
+        </div>
+        <div class="body">
+          <div style="font-size:10px;color:#8a8a84;margin-bottom:4px;">Full name</div>
+          <div class="input-box" style="margin-bottom:10px;">Enter your name</div>
+          <div style="font-size:10px;color:#8a8a84;margin-bottom:4px;">Email</div>
+          <div class="input-box" style="margin-bottom:10px;">example@email.com</div>
+          <div style="font-size:10px;color:#8a8a84;margin-bottom:4px;">Password</div>
+          <div class="input-box" style="margin-bottom:16px;">••••••••</div>
+          <div class="sl" style="margin-bottom:8px;">I am a</div>
+          <div style="background:#EEEDFE;border:1.5px solid #534AB7;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="go('coach-home')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:16px;height:16px;border-radius:50%;border:2px solid #534AB7;display:flex;align-items:center;justify-content:center;"><div style="width:7px;height:7px;border-radius:50%;background:#534AB7;"></div></div>
+              <div>
+                <div style="font-size:12px;font-weight:500;color:#3C3489;">Coach</div>
+                <div style="font-size:10px;color:#534AB7;">Manage clients · Schedule sessions</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#f1efe8;border:1px solid #eceae3;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;" onclick="go('student-home')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:16px;height:16px;border-radius:50%;border:1.5px solid #d4d2ca;"></div>
+              <div>
+                <div style="font-size:12px;font-weight:500;color:#1a1a18;">Student</div>
+                <div style="font-size:10px;color:#8a8a84;">Book sessions · View notes</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="go('coach-home')">Sign up</button>
+          <div style="text-align:center;margin-top:12px;font-size:11px;color:#8a8a84;">Already have an account? <span style="color:#534AB7;cursor:pointer;" onclick="go('login')">Log in</span></div>
+        </div>
+      </div>
+
+      <!-- ══ LOGIN ══ -->
+      <div class="screen" id="screen-login">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="back-btn" onclick="go('splash')">‹ Back</div>
+          <div class="tt">Log in</div>
+          <div style="width:40px;"></div>
+        </div>
+        <div class="body">
+          <div style="font-size:10px;color:#8a8a84;margin-bottom:4px;">Email</div>
+          <div class="input-box" style="margin-bottom:10px;">example@email.com</div>
+          <div style="font-size:10px;color:#8a8a84;margin-bottom:4px;">Password</div>
+          <div class="input-box" style="margin-bottom:4px;">••••••••</div>
+          <div style="text-align:right;font-size:10px;color:#534AB7;margin-bottom:20px;cursor:pointer;">Forgot password?</div>
+          <button class="btn-primary" style="margin-bottom:10px;" onclick="go('coach-home')">Log in as Coach</button>
+          <button class="btn-outline" onclick="go('student-home')">Log in as Student</button>
+          <div style="text-align:center;margin-top:16px;font-size:11px;color:#8a8a84;">No account yet? <span style="color:#534AB7;cursor:pointer;" onclick="go('register')">Sign up</span></div>
+        </div>
+      </div>
+
+      <!-- ══ COACH HOME ══ -->
+      <div class="screen" id="screen-coach-home">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div><div class="tt">My Calendar</div><div class="ts">May 2026</div></div>
+          <div style="width:28px;height:28px;border-radius:8px;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:16px;color:#534AB7;cursor:pointer;" onclick="showToast('New time slot added')">+</div>
+        </div>
+        <div class="body">
+          <div class="cal-grid">
+            <div class="cd">Mo</div><div class="cd">Tu</div><div class="cd">We</div><div class="cd">Th</div><div class="cd">Fr</div><div class="cd">Sa</div><div class="cd">Su</div>
+            <div class="cd has">4</div><div class="cd">5</div><div class="cd today">6</div><div class="cd">7</div><div class="cd">8</div><div class="cd has">9</div><div class="cd">10</div>
+          </div>
+          <div class="dv"></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;border-radius:2px;background:#C0DD97;"></div><span style="font-size:10px;color:#8a8a84;">Available</span></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;border-radius:2px;background:#F7C1C1;"></div><span style="font-size:10px;color:#8a8a84;">Session</span></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;border-radius:2px;background:#B5D4F4;"></div><span style="font-size:10px;color:#8a8a84;">Personal</span></div>
+          </div>
+          <div class="sl">Today's schedule — May 6</div>
+          <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">
+            <div style="display:flex;gap:6px;align-items:stretch;">
+              <div style="font-size:9px;color:#8a8a84;width:36px;padding-top:5px;flex-shrink:0;">9:00</div>
+              <div style="flex:1;background:#C0DD97;border-radius:7px;padding:7px 10px;"><div style="font-size:10px;font-weight:500;color:#27500A;">Available</div><div style="font-size:9px;color:#3B6D11;">60 min</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:stretch;cursor:pointer;" onclick="go('coach-profile')">
+              <div style="font-size:9px;color:#8a8a84;width:36px;padding-top:5px;flex-shrink:0;">10:00</div>
+              <div style="flex:1;background:#F7C1C1;border-radius:7px;padding:7px 10px;"><div style="font-size:10px;font-weight:500;color:#791F1F;">Amy S. — Strength</div><div style="font-size:9px;color:#A32D2D;">60 min · tap to open</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:stretch;">
+              <div style="font-size:9px;color:#8a8a84;width:36px;padding-top:5px;flex-shrink:0;">11:00</div>
+              <div style="flex:1;background:#F7C1C1;border-radius:7px;padding:7px 10px;"><div style="font-size:10px;font-weight:500;color:#791F1F;">Tom K. — Core</div><div style="font-size:9px;color:#A32D2D;">45 min</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:stretch;">
+              <div style="font-size:9px;color:#8a8a84;width:36px;padding-top:5px;flex-shrink:0;">14:00</div>
+              <div style="flex:1;background:#B5D4F4;border-radius:7px;padding:7px 10px;"><div style="font-size:10px;font-weight:500;color:#0C447C;">Personal time</div><div style="font-size:9px;color:#185FA5;">120 min</div></div>
+            </div>
+            <div style="display:flex;gap:6px;align-items:stretch;">
+              <div style="font-size:9px;color:#8a8a84;width:36px;padding-top:5px;flex-shrink:0;">16:00</div>
+              <div style="flex:1;background:#C0DD97;border-radius:7px;padding:7px 10px;"><div style="font-size:10px;font-weight:500;color:#27500A;">Available</div><div style="font-size:9px;color:#3B6D11;">60 min</div></div>
+            </div>
+          </div>
+          <div class="sl">Up next</div>
+          <div style="background:#FCEBEB;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="go('coach-profile')">
+            <div class="avatar" style="background:#F7C1C1;color:#791F1F;width:32px;height:32px;font-size:11px;">AS</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;font-weight:500;color:#791F1F;">Amy Smith</div>
+              <div style="font-size:10px;color:#A32D2D;">Today 10:00 · Strength</div>
+            </div>
+            <div style="font-size:10px;color:#A32D2D;font-weight:500;">in 37 min</div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">📅</span><span class="ni-l" style="color:#534AB7;">Calendar</span></div>
+          <div class="ni" onclick="go('coach-students')"><div class="ni-d"></div><span class="ni-i">👥</span><span class="ni-l">Clients</span></div>
+          <div class="ni" onclick="go('coach-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+        </div>
+      </div>
+
+      <!-- ══ COACH STUDENTS ══ -->
+      <div class="screen" id="screen-coach-students">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="tt">My Clients</div>
+          <div style="font-size:11px;color:#534AB7;cursor:pointer;" onclick="showToast('Add new client')">+ Add</div>
+        </div>
+        <div class="body">
+          <div class="input-box" style="margin-bottom:10px;color:#b4b2a9;">Search clients...</div>
+          <div class="sl">5 clients</div>
+          <div class="lrow" onclick="go('coach-profile')">
+            <div class="avatar" style="background:#FCEBEB;color:#791F1F;">AS</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Amy Smith</div><div style="font-size:10px;color:#8a8a84;">Last session: yesterday</div></div>
+            <div class="tag" style="background:#EAF3DE;color:#27500A;">Active</div>
+            <span style="color:#b4b2a9;">›</span>
+          </div>
+          <div class="lrow" onclick="showToast('Tom Kim\'s profile')">
+            <div class="avatar" style="background:#E6F1FB;color:#0C447C;">TK</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Tom Kim</div><div style="font-size:10px;color:#8a8a84;">Last session: 3 days ago</div></div>
+            <div class="tag" style="background:#EAF3DE;color:#27500A;">Active</div>
+            <span style="color:#b4b2a9;">›</span>
+          </div>
+          <div class="lrow" onclick="showToast('Mia Johnson\'s profile')">
+            <div class="avatar" style="background:#FBEAF0;color:#72243E;">MJ</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Mia Johnson</div><div style="font-size:10px;color:#8a8a84;">Last session: 1 week ago</div></div>
+            <div class="tag" style="background:#FAEEDA;color:#633806;">Inactive</div>
+            <span style="color:#b4b2a9;">›</span>
+          </div>
+          <div class="lrow" onclick="showToast('Leo Wang\'s profile')">
+            <div class="avatar" style="background:#EEEDFE;color:#3C3489;">LW</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Leo Wang</div><div style="font-size:10px;color:#8a8a84;">Last session: 2 days ago</div></div>
+            <div class="tag" style="background:#EAF3DE;color:#27500A;">Active</div>
+            <span style="color:#b4b2a9;">›</span>
+          </div>
+          <div class="lrow" onclick="showToast('Sara Ko\'s profile')">
+            <div class="avatar" style="background:#E1F5EE;color:#085041;">SK</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Sara Ko</div><div style="font-size:10px;color:#8a8a84;">Last session: 5 days ago</div></div>
+            <div class="tag" style="background:#EAF3DE;color:#27500A;">Active</div>
+            <span style="color:#b4b2a9;">›</span>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('coach-home')"><div class="ni-d"></div><span class="ni-i">📅</span><span class="ni-l">Calendar</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">👥</span><span class="ni-l" style="color:#534AB7;">Clients</span></div>
+          <div class="ni" onclick="go('coach-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+        </div>
+      </div>
+
+      <!-- ══ COACH STUDENT PROFILE ══ -->
+      <div class="screen" id="screen-coach-profile">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="back-btn" onclick="go('coach-students')">‹ Clients</div>
+          <div class="tt">Amy Smith</div>
+          <div style="font-size:11px;color:#534AB7;cursor:pointer;" onclick="showToast('Edit profile')">Edit</div>
+        </div>
+        <div class="body">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div class="avatar" style="background:#FCEBEB;color:#791F1F;width:44px;height:44px;font-size:13px;">AS</div>
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1a1a18;">Amy Smith</div>
+              <div style="font-size:11px;color:#8a8a84;">Client · joined January 2026</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
+            <div style="background:#fff;border-radius:10px;padding:10px 8px;text-align:center;border:1px solid #eceae3;"><div style="font-size:18px;font-weight:500;color:#1a1a18;">18</div><div style="font-size:9px;color:#8a8a84;">Sessions</div></div>
+            <div style="background:#fff;border-radius:10px;padding:10px 8px;text-align:center;border:1px solid #eceae3;"><div style="font-size:18px;font-weight:500;color:#1a1a18;">−3.2</div><div style="font-size:9px;color:#8a8a84;">Weight kg</div></div>
+            <div style="background:#fff;border-radius:10px;padding:10px 8px;text-align:center;border:1px solid #eceae3;"><div style="font-size:18px;font-weight:500;color:#1a1a18;">8 wk</div><div style="font-size:9px;color:#8a8a84;">Training</div></div>
+          </div>
+          <div class="sl" style="margin-bottom:7px;">Session history</div>
+          <div class="lrow" style="cursor:default;">
+            <div style="font-size:12px;color:#1a1a18;flex:1;">Strength training</div>
+            <div style="font-size:10px;color:#8a8a84;">May 5</div>
+          </div>
+          <div class="lrow" style="cursor:default;">
+            <div style="font-size:12px;color:#1a1a18;flex:1;">Stretch & core</div>
+            <div style="font-size:10px;color:#8a8a84;">May 1</div>
+          </div>
+          <div class="lrow" style="cursor:default;border:none;">
+            <div style="font-size:12px;color:#1a1a18;flex:1;">HIIT cardio</div>
+            <div style="font-size:10px;color:#8a8a84;">Apr 28</div>
+          </div>
+          <div class="dv"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+            <div class="sl" style="margin:0;">Body notes</div>
+            <div style="font-size:11px;color:#534AB7;cursor:pointer;" onclick="go('coach-heatmap')">Edit heatmap ›</div>
+          </div>
+          <div class="nc" style="cursor:pointer;" onclick="go('coach-heatmap')"><div class="nc-t">① Right shoulder</div><div class="nc-b">Scapula must retract on overhead press — avoid shrugging</div></div>
+          <div class="nc" style="cursor:pointer;" onclick="go('coach-heatmap')"><div class="nc-t">② Lower back</div><div class="nc-b">Anterior pelvic tilt during squat — strengthen core control</div></div>
+          <div class="dv"></div>
+          <div class="sl" style="margin-bottom:7px;">Progress photos</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            <div style="background:#D3D1C7;border-radius:10px;height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5F5E5A;">Week 1</div>
+            <div style="background:#C0DD97;border-radius:10px;height:60px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#27500A;">Week 8</div>
+          </div>
+          <div style="font-size:11px;color:#534AB7;text-align:center;margin-top:8px;cursor:pointer;" onclick="showToast('View all photos')">View all ›</div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('coach-home')"><div class="ni-d"></div><span class="ni-i">📅</span><span class="ni-l">Calendar</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">👥</span><span class="ni-l" style="color:#534AB7;">Clients</span></div>
+          <div class="ni" onclick="go('coach-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+        </div>
+      </div>
+
+      <!-- ══ COACH HEATMAP ══ -->
+      <div class="screen" id="screen-coach-heatmap">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="back-btn" onclick="go('coach-profile')">‹ Amy</div>
+          <div class="tt">Body notes</div>
+          <div style="font-size:11px;background:#534AB7;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;" onclick="showToast('Notes saved ✓')">Save</div>
+        </div>
+        <div class="body">
+          <div style="background:#EEEDFE;border-radius:10px;padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#534AB7" stroke-width="1.2"/><text x="7" y="10.5" text-anchor="middle" font-size="8" fill="#534AB7" font-weight="500">i</text></svg>
+            <span style="font-size:11px;color:#534AB7;">Tap any body part to add a note</span>
+          </div>
+          <div style="display:flex;justify-content:center;margin-bottom:12px;">
+            <svg width="150" height="230" viewBox="0 0 130 220" style="cursor:pointer;">
+              <ellipse cx="65" cy="20" rx="16" ry="17" fill="#D3D1C7"/>
+              <rect x="57" y="34" width="16" height="10" rx="3" fill="#D3D1C7"/>
+              <rect x="36" y="43" width="57" height="72" rx="10" fill="#D3D1C7"/>
+              <rect x="18" y="44" width="17" height="58" rx="8" fill="#D3D1C7"/>
+              <rect x="95" y="44" width="17" height="58" rx="8" fill="#D3D1C7"/>
+              <rect x="16" y="99" width="15" height="40" rx="7" fill="#B4B2A9"/>
+              <rect x="99" y="99" width="15" height="40" rx="7" fill="#B4B2A9"/>
+              <rect x="37" y="113" width="23" height="65" rx="10" fill="#D3D1C7"/>
+              <rect x="70" y="113" width="23" height="65" rx="10" fill="#D3D1C7"/>
+              <rect x="38" y="173" width="21" height="40" rx="9" fill="#B4B2A9"/>
+              <rect x="71" y="173" width="21" height="40" rx="9" fill="#B4B2A9"/>
+              <g class="heat-dot" onclick="showToast('① Right shoulder — tap to edit')">
+                <circle cx="101" cy="52" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="101" cy="52" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="101" y="55.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">1</text>
+              </g>
+              <g class="heat-dot" onclick="showToast('② Lower back — tap to edit')">
+                <circle cx="65" cy="100" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="65" cy="100" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="65" y="103.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">2</text>
+              </g>
+              <g class="heat-dot" onclick="showToast('③ Left knee — tap to edit')">
+                <circle cx="48" cy="163" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="48" cy="163" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="48" y="166.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">3</text>
+              </g>
+              <rect x="20" y="55" width="40" height="35" rx="5" fill="transparent" class="heat-dot" onclick="showToast('Tap to add note — Left shoulder')"/>
+              <rect x="55" y="10" width="20" height="25" rx="5" fill="transparent" class="heat-dot" onclick="showToast('Tap to add note — Neck')"/>
+              <rect x="36" y="55" width="57" height="60" rx="5" fill="transparent" class="heat-dot" onclick="showToast('Tap to add note — Torso')"/>
+              <rect x="70" y="113" width="23" height="50" rx="5" fill="transparent" class="heat-dot" onclick="showToast('Tap to add note — Right leg')"/>
+            </svg>
+          </div>
+          <div class="sl" style="margin-bottom:8px;">3 annotations</div>
+          <div class="nc"><div class="nc-t">① Right shoulder</div><div class="nc-b">Scapula must retract on overhead press — avoid shrugging compensation</div></div>
+          <div class="nc"><div class="nc-t">② Lower back</div><div class="nc-b">Anterior pelvic tilt during squat — reinforce core stability</div></div>
+          <div class="nc"><div class="nc-t">③ Left knee</div><div class="nc-b">Knee caves on landing — activate glute medius in warm-up</div></div>
+          <button class="btn-outline" style="margin-top:8px;" onclick="showToast('Tap the body diagram to add a new pin')">+ Add annotation</button>
+        </div>
+      </div>
+
+      <!-- ══ COACH RECIPES ══ -->
+      <div class="screen" id="screen-coach-recipes">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="tt">Recipes</div>
+          <div style="font-size:11px;color:#534AB7;cursor:pointer;" onclick="showToast('Create new recipe')">+ New</div>
+        </div>
+        <div class="body">
+          <div class="sl" style="margin-bottom:8px;">My recipe library</div>
+          <div class="card" onclick="showToast('Send High-protein grain bowl')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#EAF3DE;display:flex;align-items:center;justify-content:center;font-size:16px;">🥗</div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">High-protein grain bowl</div><div style="font-size:10px;color:#8a8a84;">520 kcal · sent to 3 clients</div></div>
+              <div style="font-size:10px;color:#534AB7;font-weight:500;background:#EEEDFE;padding:4px 10px;border-radius:7px;">Send</div>
+            </div>
+          </div>
+          <div class="card" onclick="showToast('Send Banana protein shake')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:16px;">🍌</div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Banana protein shake</div><div style="font-size:10px;color:#8a8a84;">210 kcal · sent to 5 clients</div></div>
+              <div style="font-size:10px;color:#534AB7;font-weight:500;background:#EEEDFE;padding:4px 10px;border-radius:7px;">Send</div>
+            </div>
+          </div>
+          <div class="card" onclick="showToast('Send Egg & vegetable stir-fry')">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:32px;height:32px;border-radius:9px;background:#FCEBEB;display:flex;align-items:center;justify-content:center;font-size:16px;">🍳</div>
+              <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Egg & vegetable stir-fry</div><div style="font-size:10px;color:#8a8a84;">380 kcal · not sent yet</div></div>
+              <div style="font-size:10px;color:#534AB7;font-weight:500;background:#EEEDFE;padding:4px 10px;border-radius:7px;">Send</div>
+            </div>
+          </div>
+          <div class="dv"></div>
+          <div class="sl" style="margin-bottom:8px;">Send to client</div>
+          <div style="background:#EEEDFE;border-radius:12px;padding:12px 14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="avatar" style="width:22px;height:22px;background:#FCEBEB;color:#791F1F;font-size:8px;">AS</div>
+                <span style="font-size:11px;color:#1a1a18;">Amy Smith</span>
+              </div>
+              <div style="width:16px;height:16px;border-radius:4px;background:#534AB7;display:flex;align-items:center;justify-content:center;">
+                <div style="width:8px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg);margin-top:-2px;"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="avatar" style="width:22px;height:22px;background:#E6F1FB;color:#0C447C;font-size:8px;">TK</div>
+                <span style="font-size:11px;color:#1a1a18;">Tom Kim</span>
+              </div>
+              <div style="width:16px;height:16px;border-radius:4px;border:1px solid #d4d2ca;"></div>
+            </div>
+            <button class="btn-primary" onclick="showToast('Recipe sent to Amy Smith ✓')">Confirm & send</button>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('coach-home')"><div class="ni-d"></div><span class="ni-i">📅</span><span class="ni-l">Calendar</span></div>
+          <div class="ni" onclick="go('coach-students')"><div class="ni-d"></div><span class="ni-i">👥</span><span class="ni-l">Clients</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l" style="color:#534AB7;">Recipes</span></div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENT HOME ══ -->
+      <div class="screen" id="screen-student-home">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div><div class="tt">Hey, Amy</div><div class="ts">Next class in 2 hours</div></div>
+          <div class="avatar" style="width:34px;height:34px;background:#FCEBEB;color:#791F1F;font-size:11px;">AS</div>
+        </div>
+        <div class="body">
+          <div style="background:#EEEDFE;border-radius:12px;padding:12px 14px;margin-bottom:12px;border-left:3px solid #534AB7;">
+            <div style="font-size:9px;color:#534AB7;font-weight:500;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">Coming up</div>
+            <div style="font-size:14px;font-weight:500;color:#3C3489;">Strength training</div>
+            <div style="font-size:11px;color:#534AB7;margin-top:3px;">Today 11:00 · 60 min</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:7px;">
+              <div style="width:6px;height:6px;border-radius:50%;background:#534AB7;"></div>
+              <div style="font-size:10px;color:#534AB7;">Coach Sarah · starts in 2 hours</div>
+            </div>
+          </div>
+          <div class="sl">Book a session</div>
+          <div class="cal-grid" style="margin-bottom:10px;">
+            <div class="cd">Mo</div><div class="cd">Tu</div><div class="cd">We</div><div class="cd">Th</div><div class="cd">Fr</div><div class="cd">Sa</div><div class="cd">Su</div>
+            <div class="cd today">5</div><div class="cd">6</div><div class="cd has">7</div><div class="cd">8</div><div class="cd">9</div><div class="cd has">10</div><div class="cd">11</div>
+          </div>
+          <div class="slot">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#1a1a18;">9:00 — Strength training</div>
+              <div style="font-size:10px;color:#8a8a84;">60 min · 4 spots left</div>
+            </div>
+            <button class="slot-btn" onclick="showToast('Booked! Reminder set for 1 hr before 🔔')">Book</button>
+          </div>
+          <div class="slot">
+            <div>
+              <div style="font-size:12px;font-weight:500;color:#1a1a18;">14:00 — Stretch & core</div>
+              <div style="font-size:10px;color:#8a8a84;">45 min · 6 spots left</div>
+            </div>
+            <button class="slot-btn" style="background:transparent;color:#534AB7;border:1px solid #534AB7;" onclick="showToast('Booked! Reminder set for 1 hr before 🔔')">Book</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:8px 2px;">
+            <svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="#b4b2a9" stroke-width="1"/><line x1="6.5" y1="3" x2="6.5" y2="6.5" stroke="#b4b2a9" stroke-width="1" stroke-linecap="round"/><line x1="6.5" y1="6.5" x2="9" y2="8.5" stroke="#b4b2a9" stroke-width="1" stroke-linecap="round"/></svg>
+            <span style="font-size:10px;color:#b4b2a9;">You'll get a push notification 1 hour before</span>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">🏠</span><span class="ni-l" style="color:#534AB7;">Home</span></div>
+          <div class="ni" onclick="go('student-notes')"><div class="ni-d"></div><span class="ni-i">📋</span><span class="ni-l">Notes</span></div>
+          <div class="ni" onclick="go('student-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+          <div class="ni" onclick="go('student-photos')"><div class="ni-d"></div><span class="ni-i">📸</span><span class="ni-l">Photos</span></div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENT NOTES (HEATMAP) ══ -->
+      <div class="screen" id="screen-student-notes">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="tt">Coach notes</div>
+          <div class="ts">Updated May 6</div>
+        </div>
+        <div class="body">
+          <div class="sl" style="margin-bottom:6px;">Tap a dot to read the note</div>
+          <div style="display:flex;justify-content:center;margin-bottom:10px;">
+            <svg width="150" height="230" viewBox="0 0 130 220">
+              <ellipse cx="65" cy="20" rx="16" ry="17" fill="#D3D1C7"/>
+              <rect x="57" y="34" width="16" height="10" rx="3" fill="#D3D1C7"/>
+              <rect x="36" y="43" width="57" height="72" rx="10" fill="#D3D1C7"/>
+              <rect x="18" y="44" width="17" height="58" rx="8" fill="#D3D1C7"/>
+              <rect x="95" y="44" width="17" height="58" rx="8" fill="#D3D1C7"/>
+              <rect x="16" y="99" width="15" height="40" rx="7" fill="#B4B2A9"/>
+              <rect x="99" y="99" width="15" height="40" rx="7" fill="#B4B2A9"/>
+              <rect x="37" y="113" width="23" height="65" rx="10" fill="#D3D1C7"/>
+              <rect x="70" y="113" width="23" height="65" rx="10" fill="#D3D1C7"/>
+              <rect x="38" y="173" width="21" height="40" rx="9" fill="#B4B2A9"/>
+              <rect x="71" y="173" width="21" height="40" rx="9" fill="#B4B2A9"/>
+              <g class="heat-dot" onclick="showToast('① Right shoulder: retract scapula on overhead movements')">
+                <circle cx="101" cy="52" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="101" cy="52" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="101" y="55.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">1</text>
+              </g>
+              <g class="heat-dot" onclick="showToast('② Lower back: strengthen core to reduce pelvic tilt')">
+                <circle cx="65" cy="100" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="65" cy="100" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="65" y="103.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">2</text>
+              </g>
+              <g class="heat-dot" onclick="showToast('③ Left knee: avoid knee cave on landing')">
+                <circle cx="48" cy="163" r="14" fill="#E24B4A" opacity="0.15"/>
+                <circle cx="48" cy="163" r="9" fill="#E24B4A" opacity="0.9"/>
+                <text x="48" y="166.5" text-anchor="middle" font-size="9" fill="white" font-weight="500">3</text>
+              </g>
+            </svg>
+          </div>
+          <div class="nc"><div class="nc-t">① Right shoulder</div><div class="nc-b">Scapula must retract on overhead press — avoid shrugging compensation</div></div>
+          <div class="nc"><div class="nc-t">② Lower back</div><div class="nc-b">Anterior pelvic tilt during squat — reinforce core stability</div></div>
+          <div class="nc"><div class="nc-t">③ Left knee</div><div class="nc-b">Knee caves on landing — activate glute medius in warm-up</div></div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('student-home')"><div class="ni-d"></div><span class="ni-i">🏠</span><span class="ni-l">Home</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">📋</span><span class="ni-l" style="color:#534AB7;">Notes</span></div>
+          <div class="ni" onclick="go('student-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+          <div class="ni" onclick="go('student-photos')"><div class="ni-d"></div><span class="ni-i">📸</span><span class="ni-l">Photos</span></div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENT RECIPES ══ -->
+      <div class="screen" id="screen-student-recipes">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="tt">Recipes</div>
+          <div class="ts">Sent by Coach Sarah</div>
+        </div>
+        <div class="body">
+          <div class="sl" style="margin-bottom:8px;">This week's pick</div>
+          <div style="background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:12px;border:1px solid #eceae3;cursor:pointer;" onclick="showToast('View full recipe: High-protein grain bowl')">
+            <div style="background:#EAF3DE;border-radius:10px;height:64px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:28px;">🥗</div>
+            <div style="font-size:13px;font-weight:500;color:#1a1a18;margin-bottom:3px;">High-protein grain bowl</div>
+            <div style="font-size:10px;color:#8a8a84;margin-bottom:10px;">Chicken · Quinoa · Avocado · 520 kcal</div>
+            <button class="btn-primary" onclick="showToast('Opening full recipe →')">View full recipe</button>
+          </div>
+          <div class="sl" style="margin-bottom:8px;">All recipes</div>
+          <div class="lrow" onclick="showToast('Banana protein shake — Breakfast 210kcal')">
+            <div style="width:34px;height:34px;border-radius:9px;background:#FAEEDA;display:flex;align-items:center;justify-content:center;font-size:18px;">🍌</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Banana protein shake</div><div style="font-size:10px;color:#8a8a84;">Breakfast · 210 kcal</div></div>
+            <span style="color:#534AB7;">›</span>
+          </div>
+          <div class="lrow" onclick="showToast('Egg & vegetable stir-fry — Lunch 380kcal')">
+            <div style="width:34px;height:34px;border-radius:9px;background:#FCEBEB;display:flex;align-items:center;justify-content:center;font-size:18px;">🍳</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Egg & vegetable stir-fry</div><div style="font-size:10px;color:#8a8a84;">Lunch · 380 kcal</div></div>
+            <span style="color:#534AB7;">›</span>
+          </div>
+          <div class="lrow" style="border:none;" onclick="showToast('Green salad bowl — Dinner 290kcal')">
+            <div style="width:34px;height:34px;border-radius:9px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:18px;">🥬</div>
+            <div style="flex:1;"><div style="font-size:12px;font-weight:500;color:#1a1a18;">Green salad bowl</div><div style="font-size:10px;color:#8a8a84;">Dinner · 290 kcal</div></div>
+            <span style="color:#534AB7;">›</span>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('student-home')"><div class="ni-d"></div><span class="ni-i">🏠</span><span class="ni-l">Home</span></div>
+          <div class="ni" onclick="go('student-notes')"><div class="ni-d"></div><span class="ni-i">📋</span><span class="ni-l">Notes</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l" style="color:#534AB7;">Recipes</span></div>
+          <div class="ni" onclick="go('student-photos')"><div class="ni-d"></div><span class="ni-i">📸</span><span class="ni-l">Photos</span></div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENT PHOTOS ══ -->
+      <div class="screen" id="screen-student-photos">
+        <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+        <div class="top-bar">
+          <div class="tt">My photos</div>
+          <div style="background:#534AB7;color:#fff;border-radius:7px;font-size:10px;padding:4px 10px;font-weight:500;cursor:pointer;" onclick="showToast('Choose a photo to upload')">+ Upload</div>
+        </div>
+        <div class="body">
+          <div class="sl" style="margin-bottom:8px;">Before & after</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+            <div style="background:#f1efe8;border-radius:12px;overflow:hidden;cursor:pointer;" onclick="showToast('Week 1 — Jan 5, 2026')">
+              <div style="background:#D3D1C7;height:80px;display:flex;align-items:center;justify-content:center;">
+                <svg width="28" height="46" viewBox="0 0 22 38"><ellipse cx="11" cy="5" rx="5" ry="5" fill="#B4B2A9"/><rect x="4" y="10" width="14" height="15" rx="5" fill="#B4B2A9"/><rect x="2" y="11" width="5" height="12" rx="2.5" fill="#B4B2A9"/><rect x="15" y="11" width="5" height="12" rx="2.5" fill="#B4B2A9"/><rect x="5" y="24" width="5" height="14" rx="2.5" fill="#B4B2A9"/><rect x="12" y="24" width="5" height="14" rx="2.5" fill="#B4B2A9"/></svg>
+              </div>
+              <div style="padding:7px 9px;"><div style="font-size:10px;font-weight:500;color:#5F5E5A;">Week 1</div><div style="font-size:9px;color:#b4b2a9;">Jan 5</div></div>
+            </div>
+            <div style="background:#f1efe8;border-radius:12px;overflow:hidden;cursor:pointer;" onclick="showToast('Week 8 — Mar 2, 2026')">
+              <div style="background:#C0DD97;height:80px;display:flex;align-items:center;justify-content:center;">
+                <svg width="28" height="46" viewBox="0 0 22 38"><ellipse cx="11" cy="5" rx="5" ry="5" fill="#639922"/><rect x="5" y="10" width="12" height="15" rx="5" fill="#639922"/><rect x="2" y="11" width="5" height="12" rx="2.5" fill="#639922"/><rect x="15" y="11" width="5" height="12" rx="2.5" fill="#639922"/><rect x="5" y="24" width="5" height="14" rx="2.5" fill="#639922"/><rect x="12" y="24" width="5" height="14" rx="2.5" fill="#639922"/></svg>
+              </div>
+              <div style="padding:7px 9px;"><div style="font-size:10px;font-weight:500;color:#27500A;">Week 8</div><div style="font-size:9px;color:#3B6D11;">Mar 2</div></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:12px;">
+            <div style="flex:1;background:#534AB7;border-radius:7px;font-size:10px;padding:5px;color:#fff;text-align:center;font-weight:500;cursor:pointer;">Front</div>
+            <div style="flex:1;background:#f1efe8;border-radius:7px;font-size:10px;padding:5px;color:#8a8a84;text-align:center;cursor:pointer;" onclick="showToast('Side view')">Side</div>
+            <div style="flex:1;background:#f1efe8;border-radius:7px;font-size:10px;padding:5px;color:#8a8a84;text-align:center;cursor:pointer;" onclick="showToast('Back view')">Back</div>
+          </div>
+          <div class="dv"></div>
+          <div class="sl" style="margin-bottom:8px;">Body measurements</div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#8a8a84;margin-bottom:4px;"><span>Weight</span><span style="font-weight:500;color:#1a1a18;">−3.2 kg</span></div>
+          <div style="height:5px;background:#eceae3;border-radius:3px;margin-bottom:9px;overflow:hidden;"><div style="width:45%;height:100%;background:#534AB7;border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#8a8a84;margin-bottom:4px;"><span>Waist</span><span style="font-weight:500;color:#1a1a18;">−4 cm</span></div>
+          <div style="height:5px;background:#eceae3;border-radius:3px;margin-bottom:9px;overflow:hidden;"><div style="width:60%;height:100%;background:#534AB7;border-radius:3px;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:#8a8a84;margin-bottom:4px;"><span>Body fat</span><span style="font-weight:500;color:#1a1a18;">−2.1%</span></div>
+          <div style="height:5px;background:#eceae3;border-radius:3px;margin-bottom:12px;overflow:hidden;"><div style="width:35%;height:100%;background:#534AB7;border-radius:3px;"></div></div>
+          <div class="dv"></div>
+          <div class="sl" style="margin-bottom:8px;">History</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+            <div style="background:#D3D1C7;border-radius:7px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#5F5E5A;cursor:pointer;" onclick="showToast('Week 1')">W1</div>
+            <div style="background:#C8D9A2;border-radius:7px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#3B6D11;cursor:pointer;" onclick="showToast('Week 3')">W3</div>
+            <div style="background:#BEDB8A;border-radius:7px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#27500A;cursor:pointer;" onclick="showToast('Week 5')">W5</div>
+            <div style="background:#C0DD97;border-radius:7px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#27500A;cursor:pointer;" onclick="showToast('Week 8')">W8</div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="ni" onclick="go('student-home')"><div class="ni-d"></div><span class="ni-i">🏠</span><span class="ni-l">Home</span></div>
+          <div class="ni" onclick="go('student-notes')"><div class="ni-d"></div><span class="ni-i">📋</span><span class="ni-l">Notes</span></div>
+          <div class="ni" onclick="go('student-recipes')"><div class="ni-d"></div><span class="ni-i">🥗</span><span class="ni-l">Recipes</span></div>
+          <div class="ni on"><div class="ni-d"></div><span class="ni-i">📸</span><span class="ni-l" style="color:#534AB7;">Photos</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT INFO -->
+  <div class="right-info">
+    <div style="font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#5F5E5A;margin-bottom:6px;">Interactive Prototype</div>
+    <h2 id="screen-title">Splash screen</h2>
+    <p id="screen-hint">Tap Login or Register to begin.</p>
+    <div class="tap-indicator">
+      <div class="tap-dot"></div>
+      <span style="font-size:11px;">Everything is tappable</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const screens = {
+  'splash':          { title: 'Splash screen',         hint: 'Tap Login or Register to begin.' },
+  'register':        { title: 'Register',               hint: 'Choose Coach or Student — each routes to a different app flow.' },
+  'login':           { title: 'Login',                  hint: 'Two quick-login buttons let you demo both coach and student sides.' },
+  'coach-home':      { title: 'Coach — Calendar',       hint: 'Tap the red session block (Amy S.) or the "Up next" card to open a student profile.' },
+  'coach-students':  { title: 'Coach — Client list',    hint: 'Tap Amy Smith to see her full profile. Other rows show a toast.' },
+  'coach-profile':   { title: 'Coach — Client profile', hint: 'Tap "Edit heatmap ›" or a note card to open the body heatmap editor.' },
+  'coach-heatmap':   { title: 'Coach — Body heatmap',   hint: 'Tap any numbered dot to preview its note. Tap blank body areas to simulate adding a new pin.' },
+  'coach-recipes':   { title: 'Coach — Recipes',        hint: 'Tap "Confirm & send" to simulate sending a recipe to Amy.' },
+  'student-home':    { title: 'Student — Home',         hint: 'Tap "Book" on any time slot. Use the bottom nav to explore all four sections.' },
+  'student-notes':   { title: 'Student — Body notes',   hint: 'Tap the red numbered dots to read the coach\'s annotation for that body part.' },
+  'student-recipes': { title: 'Student — Recipes',      hint: 'Read-only view of recipes shared by the coach. Tap any card to preview.' },
+  'student-photos':  { title: 'Student — Progress',     hint: 'Tap the photo panels, view toggle (Front/Side/Back), or W1–W8 history thumbnails.' },
+};
+
+let current = 'splash';
+
+function go(id) {
+  if (id === current) return;
+  const prev = document.getElementById('screen-' + current);
+  const next = document.getElementById('screen-' + id);
+  if (!next) return;
+  prev.classList.remove('active');
+  next.classList.add('active');
+  current = id;
+  document.querySelectorAll('.flow-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.screen === id);
+  });
+  const info = screens[id];
+  if (info) {
+    document.getElementById('screen-title').textContent = info.title;
+    document.getElementById('screen-hint').textContent = info.hint;
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
